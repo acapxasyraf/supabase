@@ -1,0 +1,69 @@
+# Docker Compose override for optimized startup
+# Use with: docker compose -f docker-compose.yml -f docker-compose.optimized.yml up
+
+name: supabase
+
+services:
+  # Remove analytics dependency from services that don't actually need it
+  studio:
+    depends_on:
+      kong:
+        condition: service_started
+      analytics:
+        condition: service_healthy
+    
+  kong:
+    depends_on:
+      auth:
+        condition: service_healthy
+      rest:
+        condition: service_started
+      storage:
+        condition: service_healthy
+      functions:
+        condition: service_started
+    # Remove analytics dependency - Kong doesn't need analytics to start
+    
+  auth:
+    depends_on:
+      db:
+        condition: service_healthy
+    # Remove analytics dependency - Auth can start without analytics
+    
+  rest:
+    depends_on:
+      db:
+        condition: service_healthy
+    # Remove analytics dependency - PostgREST doesn't need analytics
+    
+  realtime:
+    depends_on:
+      db:
+        condition: service_healthy
+    # Remove analytics dependency - Realtime doesn't need analytics
+    
+  meta:
+    depends_on:
+      db:
+        condition: service_healthy
+    # Remove analytics dependency - pg-meta doesn't need analytics
+    
+  functions:
+    depends_on:
+      db:
+        condition: service_healthy
+    # Remove analytics dependency - Edge functions don't need analytics
+    
+  # Analytics only depends on database
+  analytics:
+    depends_on:
+      db:
+        condition: service_healthy
+        
+  # Supavisor depends on both db and analytics since it needs the _supabase database
+  supavisor:
+    depends_on:
+      db:
+        condition: service_healthy
+      analytics:
+        condition: service_healthy

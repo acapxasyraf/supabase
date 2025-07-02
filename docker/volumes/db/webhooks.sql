@@ -1,4 +1,5 @@
 BEGIN;
+  -- supabase_admin user is created by init-supabase-admin.sh script
   -- Create pg_net extension
   CREATE EXTENSION IF NOT EXISTS pg_net SCHEMA extensions;
   -- Create supabase_functions schema
